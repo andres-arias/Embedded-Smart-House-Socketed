@@ -7,6 +7,7 @@
 
 #include "./include/photo.h"
 #include "./include/lights.h"
+#include "./include/doors.h"
 
 int main(int argc, char *argv[])
 {
@@ -53,7 +54,8 @@ int main(int argc, char *argv[])
         }
         puts("Connection accepted...");
         char buffer[12];
-        char status[1];
+        char status_lights[5];
+        char status_doors[4];
         int command;
         while (read(new_socket, buffer, sizeof(buffer)) > 0)
         {
@@ -191,41 +193,37 @@ int main(int argc, char *argv[])
                     exit(1);
                 }
                 break;
-            case 231:
-                sprintf(status, "%d", light_status(1));
-                if (write(new_socket, status, 1) < 0)
+            case 23:
+                for (int i = 0; i < 5; ++i)
+                {
+                    if (light_status(i + 1))
+                    {
+                        status_lights[i] = '1';
+                    }
+                    else
+                    {
+                        status_lights[i] = '0';
+                    }
+                }
+                if (write(new_socket, status_lights, sizeof(status_lights)) < 0)
                 {
                     perror("Error: writing on socket failed.");
                     exit(1);
                 }
                 break;
-            case 232:
-                sprintf(status, "%d", light_status(2));
-                if (write(new_socket, status, 1) < 0)
+            case 3:
+                for (int i = 0; i < 4; ++i)
                 {
-                    perror("Error: writing on socket failed.");
-                    exit(1);
+                    if (door_status(i + 1))
+                    {
+                        status_doors[i] = '1';
+                    }
+                    else
+                    {
+                        status_doors[i] = '0';
+                    }
                 }
-                break;
-            case 233:
-                sprintf(status, "%d", light_status(3));
-                if (write(new_socket, status, 1) < 0)
-                {
-                    perror("Error: writing on socket failed.");
-                    exit(1);
-                }
-                break;
-            case 234:
-                sprintf(status, "%d", light_status(4));
-                if (write(new_socket, status, 1) < 0)
-                {
-                    perror("Error: writing on socket failed.");
-                    exit(1);
-                }
-                break;
-            case 235:
-                sprintf(status, "%d", light_status(5));
-                if (write(new_socket, status, 1) < 0)
+                if (write(new_socket, status_doors, sizeof(status_doors)) < 0)
                 {
                     perror("Error: writing on socket failed.");
                     exit(1);
