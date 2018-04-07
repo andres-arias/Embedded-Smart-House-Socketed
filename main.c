@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
         char buffer[12];
         char status_lights[5];
         char status_doors[4];
+        char *file;
         int command;
         while (read(new_socket, buffer, sizeof(buffer)) > 0)
         {
@@ -63,15 +64,14 @@ int main(int argc, char *argv[])
             switch (command)
             {
             case 1:
-                if (write(new_socket, "Taking picture...", 18) < 0)
+                file = take_photo();
+                if (write(new_socket, file, strlen(file)) < 0)
                 {
                     perror("Error: writing on socket failed.");
+                    free(file);
                     exit(1);
                 }
-                if (take_photo() < 0)
-                {
-                    perror("Error: Couldn't open camera");
-                }
+                free(file);
                 break;
             case 211:
                 if (light_on(1) < 0)
