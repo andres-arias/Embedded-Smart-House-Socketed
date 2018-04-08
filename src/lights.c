@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "../include/libgpio.h"
 
 int lights[] = {0, 0, 0, 0, 0};
 

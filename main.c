@@ -90,10 +90,12 @@ int main(int argc, char *argv[])
             while (read(new_socket, buffer, sizeof(buffer)) > 0)
             {
                 command = atoi(buffer);
-                printf("Client requested: ");
                 switch (command)
                 {
-                case 1:
+                case 0:
+                    puts("Nothing.");
+                    break;
+                case 111:
                     puts("Take picture.");
                     file = take_photo();
                     if (write(new_socket, "istr", 4) < 0)
@@ -116,6 +118,7 @@ int main(int argc, char *argv[])
                     }
                     puts("Picture taken.");
                     free(file);
+                    sleep(1);
                     break;
                 case 211:
                     puts("Turn living room's lights on.");
@@ -144,8 +147,8 @@ int main(int argc, char *argv[])
                     }
                     break;
                 case 213:
-                    puts("Turn kitchen's's lights on.");
-                    if (light_on(2) < 0)
+                    puts("Turn kitchen's lights on.");
+                    if (light_on(3) < 0)
                     {
                         perror("ERROR: Couldn't turn light 1 on");
                         break;
@@ -246,7 +249,7 @@ int main(int argc, char *argv[])
                         break;
                     }
                     break;
-                case 3:
+                case 333:
                     puts("Get house status.");
                     report_status(status);
                     if (write(new_socket, status, 9) < 0)
@@ -256,6 +259,7 @@ int main(int argc, char *argv[])
                     }
                     break;
                 }
+                sleep(0.1);
             }
         }
         puts("Client disconnected...");
