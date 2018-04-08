@@ -11,4 +11,4 @@ add_executable(houseserv main.c ./src/base64.c ./src/photo.c ./src/lights.c ./sr
 
 target_link_libraries(houseserv gpio)
 
-install (TARGETS server DESTINATION bin)
+install (TARGETS houseserv DESTINATION bin)
