@@ -255,9 +255,6 @@ int main(int argc, char *argv[])
                         break;
                     }
                     break;
-                default:
-                    printf("Unknown command: %d\n", command);
-                    break;
                 }
             }
         }
