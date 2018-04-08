@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "../include/libgpio.h"
 
-void setup_lights()
+void setup_doors()
 {
     exportGPIO("4");
     exportGPIO("17");
@@ -14,7 +14,7 @@ void setup_lights()
     pinMode("22", "IN");
 }
 
-void close_lights()
+void close_doors()
 {
     unexportGPIO("4");
     unexportGPIO("17");
