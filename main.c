@@ -35,24 +35,6 @@ void report_status(char *status)
     }
 }
 
-int check_changes(char *status)
-{
-    for (int i = 0; i < 5; ++i)
-    {
-        if (status[i] != light_status(i + 1))
-            return 1;
-        else
-            return 0;
-    }
-    for (int i = 0; i < 4; ++i)
-    {
-        if (status[i] != door_status(i + 1))
-            return 1;
-        else
-            return 0;
-    }
-}
-
 int main(int argc, char *argv[])
 {
     if (argc == 1)
@@ -107,20 +89,12 @@ int main(int argc, char *argv[])
 
             while (read(new_socket, buffer, sizeof(buffer)) > 0)
             {
-                if (check_changes(status) == 1)
-                {
-                    report_status(status);
-                    if (write(new_socket, status, 9) < 0)
-                    {
-                        perror("Error: writing on socket failed.");
-                        break;
-                    }
-                }
                 command = atoi(buffer);
-                printf("%d\n", command);
+                printf("Client requested: ");
                 switch (command)
                 {
                 case 1:
+                    puts("Take picture.");
                     file = take_photo();
                     if (write(new_socket, "istr", 4) < 0)
                     {
@@ -140,134 +114,149 @@ int main(int argc, char *argv[])
                         free(file);
                         break;
                     }
+                    puts("Picture taken.");
                     free(file);
                     break;
                 case 211:
+                    puts("Turn living room's lights on.");
                     if (light_on(1) < 0)
                     {
                         perror("ERROR: Couldn't turn light 1 on");
                         break;
                     }
-                    if (write(new_socket, "Turning light 1 on", 18) < 0)
+                    if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
                         break;
                     }
                     break;
                 case 212:
+                    puts("Turn dining room's lights on.");
                     if (light_on(2) < 0)
                     {
                         perror("ERROR: Couldn't turn light 1 on");
                         break;
                     }
-                    if (write(new_socket, "Turning light 2 on", 18) < 0)
+                    if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
                         break;
                     }
                     break;
                 case 213:
+                    puts("Turn kitchen's's lights on.");
                     if (light_on(2) < 0)
                     {
                         perror("ERROR: Couldn't turn light 1 on");
                         break;
                     }
-                    if (write(new_socket, "Turning light 3 on", 18) < 0)
+                    if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
                         break;
                     }
                     break;
                 case 214:
+                    puts("Turn master bedroom's lights on.");
                     if (light_on(4) < 0)
                     {
                         perror("ERROR: Couldn't turn light 1 on");
                         break;
                     }
-                    if (write(new_socket, "Turning light 4 on", 18) < 0)
+                    if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
                         break;
                     }
                     break;
                 case 215:
+                    puts("Turn bedroom's lights on.");
                     if (light_on(5) < 0)
                     {
                         perror("ERROR: Couldn't turn light 1 on");
                         break;
                     }
-                    if (write(new_socket, "Turning light 5 on", 18) < 0)
+                    if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
                         break;
                     }
                     break;
                 case 201:
+                    puts("Turn living room's lights off.");
                     if (light_off(1) < 0)
                     {
                         perror("ERROR: Couldn't turn light 1 off");
                         break;
                     }
-                    if (write(new_socket, "Turning light 5 off", 19) < 0)
+                    if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
                         break;
                     }
                     break;
                 case 202:
+                    puts("Turn dining room's lights off.");
                     if (light_off(2) < 0)
                     {
                         perror("ERROR: Couldn't turn light 1 off");
                         break;
                     }
-                    if (write(new_socket, "Turning light 2 off", 19) < 0)
+                    if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
                     }
                     break;
                 case 203:
+                    puts("Turn kitchen's lights off.");
                     if (light_off(3) < 0)
                     {
                         perror("ERROR: Couldn't turn light 1 off");
                         break;
                     }
-                    if (write(new_socket, "Turning light 3 off", 19) < 0)
+                    if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
                         break;
                     }
                     break;
                 case 204:
+                    puts("Turn master bedroom's lights off.");
                     if (light_off(4) < 0)
                     {
                         perror("ERROR: Couldn't turn light 1 off");
                         break;
                     }
-                    if (write(new_socket, "Turning light 4 off", 19) < 0)
+                    if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
                         break;
                     }
                     break;
                 case 205:
+                    puts("Turn bedroom's lights off.");
                     if (light_off(5) < 0)
                     {
                         perror("ERROR: Couldn't turn light 1 off");
                         break;
                     }
-                    if (write(new_socket, "Turning light 5 off", 19) < 0)
+                    if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
                         break;
                     }
                     break;
                 case 3:
+                    puts("Get house status.");
                     report_status(status);
                     if (write(new_socket, status, 9) < 0)
                     {
                         perror("Error: writing on socket failed.");
                         break;
                     }
+                    break;
+                default:
+                    printf("Unknown command: %d\n", command);
                     break;
                 }
             }
