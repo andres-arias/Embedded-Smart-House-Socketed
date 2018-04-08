@@ -39,13 +39,17 @@ int check_changes(char *status)
 {
     for (int i = 0; i < 5; ++i)
     {
-        if (status[i] != light_status(i + 1)) return 1;
-        else return 0;
+        if (status[i] != light_status(i + 1))
+            return 1;
+        else
+            return 0;
     }
     for (int i = 0; i < 4; ++i)
     {
-        if (status[i] != door_status(i + 1)) return 1;
-        else return 0;
+        if (status[i] != door_status(i + 1))
+            return 1;
+        else
+            return 0;
     }
 }
 
@@ -111,7 +115,6 @@ int main(int argc, char *argv[])
                         perror("Error: writing on socket failed.");
                         break;
                     }
-                    break;
                 }
                 command = atoi(buffer);
                 printf("%d\n", command);
@@ -142,7 +145,7 @@ int main(int argc, char *argv[])
                 case 211:
                     if (light_on(1) < 0)
                     {
-                        perror("Error: Could not turn on light 1");
+                        perror("ERROR: Couldn't turn light 1 on");
                         break;
                     }
                     if (write(new_socket, "Turning light 1 on", 18) < 0)
@@ -154,7 +157,7 @@ int main(int argc, char *argv[])
                 case 212:
                     if (light_on(2) < 0)
                     {
-                        perror("Error: Could not turn on light 2");
+                        perror("ERROR: Couldn't turn light 1 on");
                         break;
                     }
                     if (write(new_socket, "Turning light 2 on", 18) < 0)
@@ -164,9 +167,9 @@ int main(int argc, char *argv[])
                     }
                     break;
                 case 213:
-                    if (light_on(3) < 0)
+                    if (light_on(2) < 0)
                     {
-                        perror("Error: Could not turn on light 3");
+                        perror("ERROR: Couldn't turn light 1 on");
                         break;
                     }
                     if (write(new_socket, "Turning light 3 on", 18) < 0)
@@ -178,7 +181,7 @@ int main(int argc, char *argv[])
                 case 214:
                     if (light_on(4) < 0)
                     {
-                        perror("Error: Could not turn on light 4");
+                        perror("ERROR: Couldn't turn light 1 on");
                         break;
                     }
                     if (write(new_socket, "Turning light 4 on", 18) < 0)
@@ -190,7 +193,7 @@ int main(int argc, char *argv[])
                 case 215:
                     if (light_on(5) < 0)
                     {
-                        perror("Error: Could not turn on light 5");
+                        perror("ERROR: Couldn't turn light 1 on");
                         break;
                     }
                     if (write(new_socket, "Turning light 5 on", 18) < 0)
@@ -202,7 +205,7 @@ int main(int argc, char *argv[])
                 case 201:
                     if (light_off(1) < 0)
                     {
-                        perror("Error: Could not turn off light 1");
+                        perror("ERROR: Couldn't turn light 1 off");
                         break;
                     }
                     if (write(new_socket, "Turning light 5 off", 19) < 0)
@@ -214,7 +217,7 @@ int main(int argc, char *argv[])
                 case 202:
                     if (light_off(2) < 0)
                     {
-                        perror("Error: Could not turn off light 2");
+                        perror("ERROR: Couldn't turn light 1 off");
                         break;
                     }
                     if (write(new_socket, "Turning light 2 off", 19) < 0)
@@ -225,7 +228,7 @@ int main(int argc, char *argv[])
                 case 203:
                     if (light_off(3) < 0)
                     {
-                        perror("Error: Could not turn off light 3");
+                        perror("ERROR: Couldn't turn light 1 off");
                         break;
                     }
                     if (write(new_socket, "Turning light 3 off", 19) < 0)
@@ -237,7 +240,7 @@ int main(int argc, char *argv[])
                 case 204:
                     if (light_off(4) < 0)
                     {
-                        perror("Error: Could not turn off light 4");
+                        perror("ERROR: Couldn't turn light 1 off");
                         break;
                     }
                     if (write(new_socket, "Turning light 4 off", 19) < 0)
@@ -249,7 +252,7 @@ int main(int argc, char *argv[])
                 case 205:
                     if (light_off(5) < 0)
                     {
-                        perror("Error: Could not turn off light 5");
+                        perror("ERROR: Couldn't turn light 1 off");
                         break;
                     }
                     if (write(new_socket, "Turning light 5 off", 19) < 0)
