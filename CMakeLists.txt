@@ -9,7 +9,6 @@ include_directories(${PROJECT_SOURCE_DIR}/lib)
 
 add_executable(server main.c ./src/base64.c ./src/photo.c ./src/lights.c ./src/doors.c)
 
-link_directories(/home/root/server/build/usr/bin)
 target_link_libraries(server gpio)
 
 install (TARGETS server DESTINATION bin)

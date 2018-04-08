@@ -35,7 +35,7 @@ char *convert_file()
 
 char *take_photo()
 {
-    if (system("fswebcam -r 640x480 -d /dev/video0 image.jpg -S 2") < 0)
+    if (system("fswebcam -r 1024x720 -d /dev/video0 image.jpg -S 2") < 0)
     {
         perror("ERROR: Couldn't open camera");
         exit(1);
