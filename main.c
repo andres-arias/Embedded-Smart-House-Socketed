@@ -48,9 +48,9 @@ int main(int argc, char *argv[])
     buffer = malloc(sizeof(char) * 3);
     status = malloc(sizeof(char) * 9);
 
-    setup_doors();
     setup_lights();
-
+    setup_doors();
+    
     port_no = atoi(argv[1]);
 
     socket_desc = socket(AF_INET, SOCK_STREAM, 0);

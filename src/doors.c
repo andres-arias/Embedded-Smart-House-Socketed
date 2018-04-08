@@ -8,10 +8,10 @@ void setup_doors()
     exportGPIO("17");
     exportGPIO("27");
     exportGPIO("22");
-    pinMode("4", "IN");
-    pinMode("17", "IN");
-    pinMode("27", "IN");
-    pinMode("22", "IN");
+    pinMode("4", "in");
+    pinMode("17", "in");
+    pinMode("27", "in");
+    pinMode("22", "in");
 }
 
 void close_doors()

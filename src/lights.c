@@ -11,11 +11,11 @@ void setup_lights()
     exportGPIO("13");
     exportGPIO("19");
     exportGPIO("26");
-    pinMode("5", "OUT");
-    pinMode("6", "OUT");
-    pinMode("13", "OUT");
-    pinMode("19", "OUT");
-    pinMode("26", "OUT");
+    pinMode("5", "out");
+    pinMode("6", "out");
+    pinMode("13", "out");
+    pinMode("19", "out");
+    pinMode("26", "out");
 }
 
 void close_lights()
