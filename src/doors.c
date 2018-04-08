@@ -26,13 +26,13 @@ int door_status(int door_num)
 {
     switch (door_num)
     {
-    case 1:
+    case 6:
         return digitalRead("4");
-    case 2:
+    case 7:
         return digitalRead("17");
-    case 3:
+    case 8:
         return digitalRead("27");
-    case 4:
+    case 9:
         return digitalRead("22");
     }
 }
