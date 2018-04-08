@@ -122,11 +122,7 @@ int main(int argc, char *argv[])
                     break;
                 case 211:
                     puts("Turn living room's lights on.");
-                    if (light_on(1) < 0)
-                    {
-                        perror("ERROR: Couldn't turn light 1 on");
-                        break;
-                    }
+                    light_on(1);
                     if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
@@ -135,11 +131,7 @@ int main(int argc, char *argv[])
                     break;
                 case 212:
                     puts("Turn dining room's lights on.");
-                    if (light_on(2) < 0)
-                    {
-                        perror("ERROR: Couldn't turn light 1 on");
-                        break;
-                    }
+                    light_on(2);
                     if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
@@ -148,11 +140,7 @@ int main(int argc, char *argv[])
                     break;
                 case 213:
                     puts("Turn kitchen's lights on.");
-                    if (light_on(3) < 0)
-                    {
-                        perror("ERROR: Couldn't turn light 1 on");
-                        break;
-                    }
+                    light_on(3);
                     if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
@@ -161,11 +149,7 @@ int main(int argc, char *argv[])
                     break;
                 case 214:
                     puts("Turn master bedroom's lights on.");
-                    if (light_on(4) < 0)
-                    {
-                        perror("ERROR: Couldn't turn light 1 on");
-                        break;
-                    }
+                    light_on(4);
                     if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
@@ -174,11 +158,7 @@ int main(int argc, char *argv[])
                     break;
                 case 215:
                     puts("Turn bedroom's lights on.");
-                    if (light_on(5) < 0)
-                    {
-                        perror("ERROR: Couldn't turn light 1 on");
-                        break;
-                    }
+                    light_on(5);
                     if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
@@ -187,11 +167,7 @@ int main(int argc, char *argv[])
                     break;
                 case 201:
                     puts("Turn living room's lights off.");
-                    if (light_off(1) < 0)
-                    {
-                        perror("ERROR: Couldn't turn light 1 off");
-                        break;
-                    }
+                    light_off(1);
                     if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
@@ -200,11 +176,7 @@ int main(int argc, char *argv[])
                     break;
                 case 202:
                     puts("Turn dining room's lights off.");
-                    if (light_off(2) < 0)
-                    {
-                        perror("ERROR: Couldn't turn light 1 off");
-                        break;
-                    }
+                    light_off(2);
                     if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
@@ -212,11 +184,7 @@ int main(int argc, char *argv[])
                     break;
                 case 203:
                     puts("Turn kitchen's lights off.");
-                    if (light_off(3) < 0)
-                    {
-                        perror("ERROR: Couldn't turn light 1 off");
-                        break;
-                    }
+                    light_off(3);
                     if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
@@ -225,11 +193,7 @@ int main(int argc, char *argv[])
                     break;
                 case 204:
                     puts("Turn master bedroom's lights off.");
-                    if (light_off(4) < 0)
-                    {
-                        perror("ERROR: Couldn't turn light 1 off");
-                        break;
-                    }
+                    light_off(4);
                     if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
@@ -238,11 +202,7 @@ int main(int argc, char *argv[])
                     break;
                 case 205:
                     puts("Turn bedroom's lights off.");
-                    if (light_off(5) < 0)
-                    {
-                        perror("ERROR: Couldn't turn light 1 off");
-                        break;
-                    }
+                    light_off(5);
                     if (write(new_socket, "update", 6) < 0)
                     {
                         perror("Error: writing on socket failed.");
@@ -269,6 +229,8 @@ int main(int argc, char *argv[])
 
     free(buffer);
     free(status);
+    close_lights();
+    close_doors();
     close(socket_desc);
     return 0;
 }
