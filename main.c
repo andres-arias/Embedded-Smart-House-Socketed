@@ -9,29 +9,35 @@
 #include "./include/lights.h"
 #include "./include/doors.h"
 #include "./include/user.h"
+#define L_BUFFER 64
+
 
 void report_status(char *status)
 {
+    status[0] = '{';
+    status[1] = 'u';
+    status[2] = ':';
+    status[12] = '}';
     for (int i = 0; i < 5; ++i)
     {
         if (light_status(i + 1) == 1)
         {
-            status[i] = '1';
+            status[i+3] = '1';
         }
         else
         {
-            status[i] = '0';
+            status[i+3] = '0';
         }
     }
     for (int i = 5; i < 9; ++i)
     {
         if (door_status(i + 1) == 1)
         {
-            status[i] = '1';
+            status[i+3] = '1';
         }
         else
         {
-            status[i] = '0';
+            status[i+3] = '0';
         }
     }
 }
@@ -46,7 +52,7 @@ int main(int argc, char *argv[])
     int port_no, socket_desc, new_socket, client_len, client_count, command, logged_in;
     struct sockaddr_in server_addr, client_addr;
     char *buffer, *status, *file;
-    buffer = malloc(sizeof(char) * 64);
+    buffer = malloc(sizeof(char) * L_BUFFER);
     status = malloc(sizeof(char) * 9);
     logged_in = 0;
 
@@ -74,7 +80,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
     puts("Bind successful");
-
+	
     while (1)
     {
         listen(socket_desc, 5);
@@ -87,20 +93,58 @@ int main(int argc, char *argv[])
         else
         {
             puts("Connection accepted...");
-            if (write(new_socket, "ok", 2) < 0)
+            if (write(new_socket, "{ok}", 4) < 0)
             {
                 perror("Error: writing on socket failed.");
             }
-
-            while (read(new_socket, buffer, sizeof(buffer)) > 0)
+            char msg[L_BUFFER];
+            int index = 0;
+            int receiveing = 0;
+            int newMsg = 0;
+            while (1)
             {
+                for(int x=0;x<L_BUFFER;x++){
+                    buffer[x] = '\0';
+                }
+                recv(new_socket, buffer, sizeof(buffer), 0);
+
+                if (buffer[0] == '{'){
+                    index = 0;
+                    for(int x=0;x<L_BUFFER;x++){
+                        msg[x] = '\0';
+                    }
+                    receiveing = 1;
+                }
+                if (receiveing){
+                    for(int x=0;x<L_BUFFER;x++){
+                        if (buffer[x] == '{'){
+                            continue;
+                        }
+                        else if (buffer[x] == '}'){
+                            receiveing = 0;
+                            newMsg = 1;
+                            index = 0;
+                            break;
+                        }
+                        else if (buffer[x] != '\0'){
+                            msg[index++] = buffer[x]; 
+                        }
+                    } 
+                }
+
+                if (newMsg){
+                    newMsg = 0;
+                    printf("New msg %s\n", msg);
+                
+                
                 if (logged_in == 0)
                 {
-                    if (login(buffer) == 1)
+
+                    if (login(msg) == 1)
                     {
                         puts("Client logged in");
                         logged_in = 1;
-                        if (write(new_socket, "accepted", 8) < 0)
+                        if (write(new_socket, "{accepted}", 10) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             break;
@@ -109,25 +153,26 @@ int main(int argc, char *argv[])
                     else
                     {
                         puts("Login failed");
-                        if (write(new_socket, "denied", 6) < 0)
+                        if (write(new_socket, "{denied}", 8) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             break;
                         }
+			break;
                     }
                 }
                 else
                 {
-                    command = atoi(buffer);
+                    command = atoi(msg);
                     switch (command)
                     {
                     case 0:
                         puts("Nothing.");
                         break;
-                    case 111:
+                    case 1:
                         puts("Take picture.");
                         file = take_photo();
-                        if (write(new_socket, "istr", 4) < 0)
+                        if (write(new_socket, "{image:", 7) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             free(file);
@@ -139,20 +184,22 @@ int main(int argc, char *argv[])
                             free(file);
                             break;
                         }
-                        if (write(new_socket, "iend", 4) < 0)
+			sleep(3);
+                        if (write(new_socket, "}", 1) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             free(file);
                             break;
                         }
+
                         puts("Picture taken.");
                         free(file);
-                        sleep(1);
+                   
                         break;
                     case 211:
                         puts("Turn living room's lights on.");
                         light_on(1);
-                        if (write(new_socket, "update", 6) < 0)
+                        if (write(new_socket, "{update}", 8) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             break;
@@ -161,7 +208,7 @@ int main(int argc, char *argv[])
                     case 212:
                         puts("Turn dining room's lights on.");
                         light_on(2);
-                        if (write(new_socket, "update", 6) < 0)
+                        if (write(new_socket, "{update}", 8) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             break;
@@ -170,7 +217,7 @@ int main(int argc, char *argv[])
                     case 213:
                         puts("Turn kitchen's lights on.");
                         light_on(3);
-                        if (write(new_socket, "update", 6) < 0)
+                        if (write(new_socket, "{update}", 8) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             break;
@@ -179,7 +226,7 @@ int main(int argc, char *argv[])
                     case 214:
                         puts("Turn master bedroom's lights on.");
                         light_on(4);
-                        if (write(new_socket, "update", 6) < 0)
+                        if (write(new_socket, "{update}", 8) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             break;
@@ -188,7 +235,20 @@ int main(int argc, char *argv[])
                     case 215:
                         puts("Turn bedroom's lights on.");
                         light_on(5);
-                        if (write(new_socket, "update", 6) < 0)
+                        if (write(new_socket, "{update}", 8) < 0)
+                        {
+                            perror("Error: writing on socket failed.");
+                            break;
+                        }
+                        break;
+                    case 21:
+                        puts("Turn all lights on.");
+                        light_on(1);
+                        light_on(2);
+                        light_on(3);
+                        light_on(4);
+                        light_on(5);
+                        if (write(new_socket, "{update}", 8) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             break;
@@ -197,7 +257,7 @@ int main(int argc, char *argv[])
                     case 201:
                         puts("Turn living room's lights off.");
                         light_off(1);
-                        if (write(new_socket, "update", 6) < 0)
+                        if (write(new_socket, "{update}", 8) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             break;
@@ -206,7 +266,7 @@ int main(int argc, char *argv[])
                     case 202:
                         puts("Turn dining room's lights off.");
                         light_off(2);
-                        if (write(new_socket, "update", 6) < 0)
+                        if (write(new_socket, "{update}", 8) < 0)
                         {
                             perror("Error: writing on socket failed.");
                         }
@@ -214,7 +274,7 @@ int main(int argc, char *argv[])
                     case 203:
                         puts("Turn kitchen's lights off.");
                         light_off(3);
-                        if (write(new_socket, "update", 6) < 0)
+                        if (write(new_socket, "{update}", 8) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             break;
@@ -223,7 +283,7 @@ int main(int argc, char *argv[])
                     case 204:
                         puts("Turn master bedroom's lights off.");
                         light_off(4);
-                        if (write(new_socket, "update", 6) < 0)
+                        if (write(new_socket, "{update}", 8) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             break;
@@ -232,7 +292,20 @@ int main(int argc, char *argv[])
                     case 205:
                         puts("Turn bedroom's lights off.");
                         light_off(5);
-                        if (write(new_socket, "update", 6) < 0)
+                        if (write(new_socket, "{update}", 8) < 0)
+                        {
+                            perror("Error: writing on socket failed.");
+                            break;
+                        }
+                        break;
+                    case 20:
+                        puts("Turn all lights off.");
+                        light_off(1);
+                        light_off(2);
+                        light_off(3);
+                        light_off(4);
+                        light_off(5);
+                        if (write(new_socket, "{update}", 8) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             break;
@@ -241,7 +314,7 @@ int main(int argc, char *argv[])
                     case 333:
                         puts("Get house status.");
                         report_status(status);
-                        if (write(new_socket, status, 9) < 0)
+                        if (write(new_socket, status, 13) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             break;
@@ -257,6 +330,7 @@ int main(int argc, char *argv[])
                         break;
                     }
                     sleep(0.1);
+                }
                 }
             }
         }
