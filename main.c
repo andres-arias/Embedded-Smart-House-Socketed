@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -42,130 +43,86 @@ void report_status(char *status)
     }
 }
 
-int main(int argc, char *argv[])
-{
-    if (argc == 1)
-    {
-        puts("Error: No port given");
-        return 0;
-    }
-    int port_no, socket_desc, new_socket, client_len, client_count, command, logged_in;
-    struct sockaddr_in server_addr, client_addr;
+void attendConnection(int new_socket){
+    
+    puts("Connection accepted...");
     char *buffer, *status, *file;
     buffer = malloc(sizeof(char) * L_BUFFER);
     status = malloc(sizeof(char) * 9);
-    logged_in = 0;
-
-    setup_lights();
-    setup_doors();
-
-    port_no = atoi(argv[1]);
-
-    socket_desc = socket(AF_INET, SOCK_STREAM, 0);
-    if (socket_desc < 0)
+    int logged_in = 0, command = 0;
+    if (write(new_socket, "{ok}", 4) < 0)
     {
-        puts("Could not create socket.");
-        exit(1);
+        perror("Error: writing on socket failed.");
     }
-    puts("Socket created");
-
-    bzero((char *)&server_addr, sizeof(server_addr));
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(port_no);
-
-    if (bind(socket_desc, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
-    {
-        perror("Error: Bind failed");
-        exit(1);
-    }
-    puts("Bind successful");
-	
+    char msg[L_BUFFER];
+    int index = 0;
+    int receiveing = 0;
+    int newMsg = 0;
     while (1)
     {
-        listen(socket_desc, 5);
-        puts("Awaiting incoming connections...");
-        client_len = sizeof(client_addr);
-
-        new_socket = accept(socket_desc, (struct sockaddr *)&client_addr, &client_len);
-        if (new_socket < 0)
-            perror("Error: Accepting failed");
-        else
-        {
-            puts("Connection accepted...");
-            if (write(new_socket, "{ok}", 4) < 0)
-            {
-                perror("Error: writing on socket failed.");
+        for(int x=0;x<L_BUFFER;x++){
+            buffer[x] = '\0';
+        }
+        recv(new_socket, buffer, sizeof(buffer), 0);
+        
+        if (buffer[0] == '{'){
+            index = 0;
+            for(int x=0;x<L_BUFFER;x++){
+                msg[x] = '\0';
             }
-            char msg[L_BUFFER];
-            int index = 0;
-            int receiveing = 0;
-            int newMsg = 0;
-            while (1)
-            {
-                for(int x=0;x<L_BUFFER;x++){
-                    buffer[x] = '\0';
+            receiveing = 1;
+        }
+        if (receiveing){
+            for(int x=0;x<L_BUFFER;x++){
+                if (buffer[x] == '{'){
+                    continue;
                 }
-                recv(new_socket, buffer, sizeof(buffer), 0);
-
-                if (buffer[0] == '{'){
+                else if (buffer[x] == '}'){
+                    receiveing = 0;
+                    newMsg = 1;
                     index = 0;
-                    for(int x=0;x<L_BUFFER;x++){
-                        msg[x] = '\0';
-                    }
-                    receiveing = 1;
+                    break;
                 }
-                if (receiveing){
-                    for(int x=0;x<L_BUFFER;x++){
-                        if (buffer[x] == '{'){
-                            continue;
-                        }
-                        else if (buffer[x] == '}'){
-                            receiveing = 0;
-                            newMsg = 1;
-                            index = 0;
-                            break;
-                        }
-                        else if (buffer[x] != '\0'){
-                            msg[index++] = buffer[x]; 
-                        }
-                    } 
+                else if (buffer[x] != '\0'){
+                    msg[index++] = buffer[x];
                 }
-
-                if (newMsg){
-                    newMsg = 0;
-                    printf("New msg %s\n", msg);
+            }
+        }
+        
+        if (newMsg){
+            newMsg = 0;
+            printf("New msg %s\n", msg);
+            
+            
+            if (logged_in == 0)
+            {
                 
-                
-                if (logged_in == 0)
+                if (login(msg) == 1)
                 {
-
-                    if (login(msg) == 1)
+                    puts("Client logged in");
+                    logged_in = 1;
+                    if (write(new_socket, "{accepted}", 10) < 0)
                     {
-                        puts("Client logged in");
-                        logged_in = 1;
-                        if (write(new_socket, "{accepted}", 10) < 0)
-                        {
-                            perror("Error: writing on socket failed.");
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        puts("Login failed");
-                        if (write(new_socket, "{denied}", 8) < 0)
-                        {
-                            perror("Error: writing on socket failed.");
-                            break;
-                        }
-			break;
+                        perror("Error: writing on socket failed.");
+                        break;
                     }
                 }
                 else
                 {
-                    command = atoi(msg);
-                    switch (command)
+                    puts("Login failed");
+                    if (write(new_socket, "{denied}", 8) < 0)
                     {
+                        perror("Error: writing on socket failed.");
+                        break;
+                    }
+                    break;
+                }
+            }
+            else
+            {
+                command = atoi(msg);
+                switch (command)
+                {
                     case 0:
                         puts("Nothing.");
                         break;
@@ -184,17 +141,17 @@ int main(int argc, char *argv[])
                             free(file);
                             break;
                         }
-			sleep(3);
+                        sleep(3);
                         if (write(new_socket, "}", 1) < 0)
                         {
                             perror("Error: writing on socket failed.");
                             free(file);
                             break;
                         }
-
+                        
                         puts("Picture taken.");
                         free(file);
-                   
+                        
                         break;
                     case 211:
                         puts("Turn living room's lights on.");
@@ -328,16 +285,73 @@ int main(int argc, char *argv[])
                         setup_doors();
                         setup_lights();
                         break;
-                    }
-                    sleep(0.1);
                 }
-                }
+                sleep(0.1);
             }
+        }
+    }
+}
+
+
+int main(int argc, char *argv[])
+{
+    if (argc == 1)
+    {
+        puts("Error: No port given");
+        return 0;
+    }
+    int port_no, socket_desc, new_socket, client_len, client_count, command, logged_in;
+    struct sockaddr_in server_addr, client_addr;
+    char *buffer, *status, *file;
+    buffer = malloc(sizeof(char) * L_BUFFER);
+    status = malloc(sizeof(char) * 9);
+    logged_in = 0;
+
+    setup_lights();
+    setup_doors();
+
+    port_no = atoi(argv[1]);
+
+    socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+    if (socket_desc < 0)
+    {
+        puts("Could not create socket.");
+        exit(1);
+    }
+    puts("Socket created");
+
+    bzero((char *)&server_addr, sizeof(server_addr));
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port_no);
+
+    if (bind(socket_desc, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
+    {
+        perror("Error: Bind failed");
+        exit(1);
+    }
+    puts("Bind successful");
+	pthread_t newthread;
+    while (1)
+    {
+        listen(socket_desc, 5);
+        puts("Awaiting incoming connections...");
+        client_len = sizeof(client_addr);
+        
+        
+        new_socket = accept(socket_desc, (struct sockaddr *)&client_addr, &client_len);
+        
+        if (new_socket < 0)
+            perror("Error: Accepting failed");
+        else
+        {
+            if (pthread_create(&newthread , NULL, attendConnection, new_socket) != 0)
+                perror("pthread_create");
         }
         puts("Client disconnected...");
         puts("----------------------");
         logged_in = 0;
-        close(new_socket);
+        //close(new_socket);
     }
 
     free(buffer);
@@ -347,3 +361,5 @@ int main(int argc, char *argv[])
     close(socket_desc);
     return 0;
 }
+
+
