@@ -142,7 +142,6 @@ void* attendConnection(void* socket){
                             free(file);
                             break;
                         }
-                        sleep(3);
                         if (write(new_socket, "}", 1) < 0)
                         {
                             perror("Error: writing on socket failed.");
