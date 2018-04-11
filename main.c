@@ -43,8 +43,9 @@ void report_status(char *status)
     }
 }
 
-void attendConnection(int new_socket){
+void* attendConnection(void* socket){
     
+    int new_socket =  *((int *) socket);
     puts("Connection accepted...");
     char *buffer, *status, *file;
     buffer = malloc(sizeof(char) * L_BUFFER);
@@ -286,10 +287,10 @@ void attendConnection(int new_socket){
                         setup_lights();
                         break;
                 }
-                sleep(0.1);
             }
         }
     }
+    return 0;
 }
 
 
@@ -345,7 +346,8 @@ int main(int argc, char *argv[])
             perror("Error: Accepting failed");
         else
         {
-            if (pthread_create(&newthread , NULL, attendConnection, new_socket) != 0)
+            void *pointer = &new_socket;
+            if (pthread_create(&newthread , NULL, attendConnection, pointer) != 0)
                 perror("pthread_create");
         }
         puts("Client disconnected...");
